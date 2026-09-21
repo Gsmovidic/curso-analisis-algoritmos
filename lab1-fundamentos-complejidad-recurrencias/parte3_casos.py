@@ -1,4 +1,5 @@
 """Experimento de la Parte 3: Evaluación de Insertion Sort en Escenarios A, B y C."""
+
 import os
 import time
 import matplotlib.pyplot as plt
@@ -21,23 +22,29 @@ def ejecutar_experimento_p3():
 
     for nombre, generador in escenarios.items():
         for n in tamanos:
-            datos = (
-                generador(n, semilla=42)
-                if nombre != "C (Orden Inverso)"
-                else generador(n)
-            )
-
-            # Promedio de 3 corridas para mitigar ruido
             tiempos = []
-            comp = 0
-            for _ in range(3):
+            comparaciones_lista = []
+
+            for i in range(3):
+                # Generamos una lista nueva usando semillas distintas por corrida
+                # para que no reutilice la lista que ya fue ordenada
+                if nombre == "C (Orden Inverso)":
+                    datos = generador(n)
+                else:
+                    datos = generador(n, semilla=42 + i)
+
                 t_inicio = time.perf_counter()
                 _, comp = insertion_sort(datos)
                 t_fin = time.perf_counter()
-                tiempos.append(t_fin - t_inicio)
 
-            resultados_comp[nombre].append(comp)
-            resultados_tiempo[nombre].append(sum(tiempos) / 3)
+                tiempos.append(t_fin - t_inicio)
+                comparaciones_lista.append(comp)
+
+            # Guardamos el promedio del tiempo y de las comparaciones
+            resultados_comp[nombre].append(
+                sum(comparaciones_lista) / len(comparaciones_lista)
+            )
+            resultados_tiempo[nombre].append(sum(tiempos) / len(tiempos))
 
     # Gráfica 1: Comparaciones
     plt.figure(figsize=(8, 5))
@@ -56,7 +63,9 @@ def ejecutar_experimento_p3():
     plt.figure(figsize=(8, 5))
     for nombre in escenarios:
         plt.plot(tamanos, resultados_tiempo[nombre], marker="s", label=nombre)
-    plt.title("Parte 3: Tiempo de Ejecución vs. Tamaño de Entrada (Insertion Sort)")
+    plt.title(
+        "Parte 3: Tiempo de Ejecución vs. Tamaño de Entrada (Insertion Sort)"
+    )
     plt.xlabel("Tamaño de Entrada (n)")
     plt.ylabel("Tiempo de Ejecución (segundos)")
     plt.grid(True, linestyle="--", alpha=0.7)
@@ -67,9 +76,8 @@ def ejecutar_experimento_p3():
 
 
 if __name__ == "__main__":
-
-   if __name__ == "__main__":
     print("Iniciando experimento de la Parte 3...")
     ejecutar_experimento_p3()
-    print("✓ Experimento 3 finalizado. Revisa la carpeta 'graficas/'.")
-    
+    print(
+        "✓ Experimento 3 finalizado. Revisa la carpeta 'graficas/'."
+    )
